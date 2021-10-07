@@ -136,6 +136,12 @@ void RenderThread::ProcessCommands()
 			m_pRenderEngine->RT_LoadOgreHead();
 			break;
 		}
+		case eRC_LoadSphere:
+		{
+			auto index = ReadCommand<DWORD>(n);
+			m_pRenderEngine->RT_CreateSphere(index);
+			break;
+		}
 		case eRC_SetupDefaultLight:
 		{
 			m_pRenderEngine->RT_SetupDefaultLight();
@@ -145,6 +151,15 @@ void RenderThread::ProcessCommands()
 		{
 			float time = ReadCommand<float>(n);
 			m_pRenderEngine->RT_OscillateCamera(time);
+			break;
+		}
+		case eRC_UpdateGBody:
+		{
+			auto index = ReadCommand<DWORD>(n);
+			float x = ReadCommand<float>(n);
+			float y = ReadCommand<float>(n);
+			float z = ReadCommand<float>(n);
+			m_pRenderEngine->RC_UpdateGBody(index, { x, y, z });
 			break;
 		}
 		}
@@ -266,6 +281,22 @@ void RenderThread::RC_OscillateCamera(float time)
 	LOADINGCOMMAND_CRITICAL_SECTION;
 	byte* p = AddCommand(eRC_OscillateCamera, sizeof(float));
 	AddFloat(p, time);
+}
+
+void RenderThread::RC_UpdateGBody(const UINT32& index, const Ogre::Vector3& pos)
+{
+	if (IsRenderThread())
+	{
+		m_pRenderEngine->RC_UpdateGBody(index, pos);
+		return;
+	}
+
+	LOADINGCOMMAND_CRITICAL_SECTION;
+	byte* p = AddCommand(eRC_UpdateGBody, sizeof(DWORD) + 3 * sizeof(float));
+	AddDWORD(p, index);
+	AddFloat(p, pos.x);
+	AddFloat(p, pos.y);
+	AddFloat(p, pos.z);
 }
 
 void RenderThread::RC_BeginFrame()

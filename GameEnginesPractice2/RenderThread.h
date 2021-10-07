@@ -17,8 +17,10 @@ enum RenderCommand : UINT32
 	eRC_SetupDefaultCompositor,
 	eRC_LoadDefaultResources,
 	eRC_LoadOgreHead,
+	eRC_LoadSphere,
 	eRC_SetupDefaultLight,
 	eRC_OscillateCamera,
+	eRC_UpdateGBody,
 	eRC_BeginFrame,
 	eRC_EndFrame
 };
@@ -41,6 +43,7 @@ public:
 	void RC_OscillateCamera(float time);
 	void RC_BeginFrame();
 	void RC_EndFrame();
+	void RC_UpdateGBody(const UINT32& index, const Ogre::Vector3& pos);
 
 private:
 	threadID m_nRenderThreadId;

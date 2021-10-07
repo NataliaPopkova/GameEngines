@@ -2,6 +2,11 @@
 
 #include "ProjectDefines.h"
 
+#include "Hlms/Pbs/OgreHlmsPbsDatablock.h"
+#include "Hlms/Unlit/OgreHlmsUnlit.h"
+#include "Hlms/Unlit/OgreHlmsUnlitPrerequisites.h"
+#include "Hlms/Unlit/OgreHlmsUnlitDatablock.h"
+
 RenderEngine::RenderEngine() :
 	m_pRoot(nullptr),
 	m_pRenderWindow(nullptr),
@@ -274,4 +279,38 @@ void RenderEngine::RT_SetupDefaultLight()
 void RenderEngine::RT_OscillateCamera(float time)
 {
 	m_pCamera->setPosition(Ogre::Vector3(0, time, 15));
+}
+
+void RenderEngine::RT_CreateSphere(const size_t& index)
+{
+	Ogre::Item* item = m_pSceneManager->createItem("sphere.mesh Imported",
+		Ogre::ResourceGroupManager::
+		AUTODETECT_RESOURCE_GROUP_NAME,
+		Ogre::SCENE_DYNAMIC);
+
+	Ogre::HlmsManager* hlmsManager = m_pRoot->getHlmsManager();
+
+	dynamic_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
+
+	Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
+
+	Ogre::HlmsPbsDatablock* datablock = static_cast<Ogre::HlmsPbsDatablock*>(
+		hlmsPbs->createDatablock("Test",
+			"Test",
+			Ogre::HlmsMacroblock(),
+			Ogre::HlmsBlendblock(),
+			Ogre::HlmsParamVec()));
+
+	datablock->setWorkflow(Ogre::HlmsPbsDatablock::MetallicWorkflow);
+	datablock->setDiffuse(Ogre::Vector3(0.0f, 2.0f, 0.0f));
+	datablock->setMetalness(1.0f);
+	datablock->setEmissive(Ogre::Vector3(0.2f, 0.0f, 0.0f));
+
+	item->setDatablock(datablock);
+}
+
+void RenderEngine::RC_UpdateGBody(const UINT32& index, const Ogre::Vector3& pos)
+{
+	Ogre::Node* sceneNode = m_pSceneManager->getRootSceneNode()->getChild(0)->getChild(index);
+	sceneNode->setPosition(pos);
 }
